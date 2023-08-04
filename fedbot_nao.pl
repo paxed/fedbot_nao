@@ -83,6 +83,9 @@ sub tail {
         or die "Unable to open " . $CONFIG{'TAIL_FILE'} . " for reading: $!";
 
     my $line;
+    my $sleepwait = int($CONFIG{'SLEEP_WAIT'} || 5);
+
+    $sleepwait = 5 if ($sleepwait < 1);
 
     seek $loghandle, 0, SEEK_END;
 
@@ -92,7 +95,7 @@ sub tail {
         $line = <$loghandle>;
         if (!$line || !($line =~ /\n$/) || ($line =~ /^\s*$/)) {
             $loghandle->clearerr();
-            sleep 5;
+            sleep $sleepwait;
             next;
         }
 
