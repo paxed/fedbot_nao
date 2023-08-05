@@ -120,7 +120,13 @@ sub tail {
 
         my $str = "#NetHack $d{version}: $d{name} ($d{role} $d{race} $d{gender} $d{align}) $d{death} with $d{points} points, in $d{turns} turns.";
 
-        if (exists($d{dumpfileurl}) && exists($d{dumpfileext})) {
+        if (exists($d{dumpfileurl})) {
+            if (!exists($d{dumpfileext})) {
+                my $tmpver = $d{version};
+                $tmpver =~ s/\.//g;
+                $d{dumpfileext} = "nh" . $tmpver . ".txt";
+            }
+
             $str .= "\n$d{dumpfileurl}/$d{firstchar}/$d{name}/dumplog/$d{starttime}.$d{dumpfileext}";
         }
 
