@@ -101,14 +101,22 @@ sub tail {
 
         $line =~ s/\n$//;
 
-        if (exists($CONFIG{'FILTER'})) {
-            next if (!($line =~ /$CONFIG{'FILTER'}/));
-        }
         if (exists($CONFIG{'LINE_EXTRA_DATA'})) {
             $line .= "\t$CONFIG{'LINE_EXTRA_DATA'}";
         }
 
         my %d = parse_xlogline($line);
+
+        if (exists($CONFIG{'FILTER'})) {
+            my $filter = $CONFIG{'FILTER'};
+            if ($filter =~ /^([^=]+)=(.*)$/) {
+                my ($fld, $dat) = ($1, $2);
+                next if (!exists($d{$fld}));
+                next if ($d{$fld} ne $dat);
+            } else {
+                next if (!($line =~ /$CONFIG{'FILTER'}/));
+            }
+        }
 
         my $str = "#NetHack $d{version}: $d{name} ($d{role} $d{race} $d{gender} $d{align}) $d{death} with $d{points} points, in $d{turns} turns.";
 
