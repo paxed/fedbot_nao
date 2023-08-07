@@ -60,20 +60,31 @@ sub post_to_fed {
 
     my $url = "https://${CONFIG{'INSTANCE_HOST'}}/api/v1/statuses?access_token=${CONFIG{'API_ACCESS_TOKEN'}}";
 
+    my $tries = 0;
 
-    my $browser = LWP::UserAgent->new;
+    while ($tries < 5) {
+        $tries++;
+        my $browser = LWP::UserAgent->new;
 
-    my $response = $browser->post( $url,
-                                   [
-                                    status => $content,
-                                    visibility => $CONFIG{'VISIBILITY'} || 'unlisted'
-                                   ],
-        );
+        my $response = $browser->post( $url,
+                                       [
+                                        status => $content,
+                                        visibility => $CONFIG{'VISIBILITY'} || 'unlisted'
+                                       ],
+            );
 
-    if ($response->is_success) {
-        print "Posted [$content]\n";
-    } else {
-	print STDERR "Failed: " , $response->status_line, "\n";
+        if ($response->is_success) {
+            print "Posted [$content]\n";
+            return;
+        } else {
+            print STDERR "Failed: " , $response->status_line, "\n";
+            if ($tries < 5) {
+                print STDERR "Retrying in 30\n";
+                sleep 30;
+            } else {
+                print STDERR "Failed $tries tries, skipping.\n";
+            }
+        }
     }
 }
 
